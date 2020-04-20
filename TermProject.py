@@ -137,7 +137,7 @@ if __name__ == "__main__":
 
     plot_multiline_chart_pandas_using_index([train, test, holt_winter_df], "traffic_volume",
                                             ["Train", "Test", "Prediction"], ["Blue", "Orange", "Green"],
-                                            "Date Time", "Traffic Volume",
+                                            "Time", "Traffic Volume",
                                             "Traffic Volume Prediction Using Holt Winter",
                                             rotate_xticks=True)
 
@@ -237,7 +237,7 @@ if __name__ == "__main__":
     plot_multiline_chart_pandas_using_index([lm_train_mm_scaled, lm_test_mm_scaled, lm_predictions_scaled],
                                             "traffic_volume",
                                             ["Train", "Test", "Prediction"], ["Blue", "Orange", "Green"],
-                                            "Date Time", "Traffic Volume",
+                                            "Time", "Traffic Volume",
                                             "Traffic Volume Prediction Using Multiple Linear Model Scaled",
                                             rotate_xticks=True)
 
@@ -257,7 +257,7 @@ if __name__ == "__main__":
     #
     # plot_multiline_chart_pandas_using_index([lm_train, lm_test, lm_predictions], "traffic_volume",
     #                                         ["Train", "Test", "Prediction"], ["Blue", "Orange", "Green"],
-    #                                         "Date Time", "Traffic Volume",
+    #                                         "Time", "Traffic Volume",
     #                                         "Traffic Volume Prediction Using Multiple Linear Model",
     #                                         rotate_xticks=True)
 
