@@ -985,13 +985,13 @@ def plot_survival_curve(duration_list: list, event_list: list, label_list: list,
         print("Duration and event list size are not same, thus cannot create survival plot.")
 
 
-def plot_heatmap(corr_df, title, xticks=None, yticks=None, annotation=True):
+def plot_heatmap(corr_df, title, xticks=None, yticks=None, x_axis_rotation=0, annotation=True):
     sns.heatmap(corr_df, annot=annotation)
     plt.title(title)
     if xticks is not None:
-        plt.xticks(xticks)
+        plt.xticks([i for i in range(len(xticks))], xticks, rotation=x_axis_rotation)
     if yticks is not None:
-        plt.yticks(yticks)
+        plt.yticks([i for i in range(len(yticks))], yticks)
     plt.show()
 
 
@@ -1063,21 +1063,3 @@ def statsmodels_get_roots_AR(model):
 
 def statsmodels_get_roots_MA(model):
     return model.maroots
-
-
-# -----------------------------------------------------DUMB FUNCTIONS--------------------------
-def dumb1(train, test, config_string, intercept):
-    model = normal_equation_using_statsmodels(
-        train[np.setdiff1d(train.columns, "traffic_volume")], train["traffic_volume"], intercept=intercept)
-
-    print(config_string)
-    print(model.summary())
-    print()
-    print()
-    prediction = normal_equation_prediction_using_statsmodels(model,
-                                                              test[np.setdiff1d(test.columns, "traffic_volume")],
-                                                              intercept=intercept)
-
-    mse1 = cal_mse(list(test["traffic_volume"]), list(prediction))
-
-    return config_string, model.aic, model.bic, model.rsquared, model.rsquared_adj, mse1, np.sqrt(mse1), prediction

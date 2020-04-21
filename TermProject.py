@@ -6,7 +6,8 @@ from sklearn.preprocessing import MinMaxScaler
 
 from ToolBox import split_df_train_test, plot_line_using_pandas_index, cal_auto_correlation, plot_acf, plot_heatmap, \
     adf_cal, plot_seasonal_decomposition, generic_holt_linear_winter, plot_multiline_chart_pandas_using_index, cal_mse, \
-    dumb1
+    normal_equation_using_statsmodels, normal_equation_prediction_using_statsmodels, cal_forecast_errors, \
+    box_pierce_test
 
 if __name__ == "__main__":
     # pandas print options
@@ -117,10 +118,11 @@ if __name__ == "__main__":
     plot_seasonal_decomposition(train["traffic_volume"], None, "Additive Residuals", "additive")
 
     # to keep track of performance for all the models
+    # TODO add variance and mean of residuals
     result_performance = pd.DataFrame({"MSE": [], "Model": []})
 
     # --------------------------------------------------- HOLT WINTER----------------------------------------------
-
+    # TODO add ACF plots, RMSE, Mean of the residual, variance of residual
     holt_winter_prediction = generic_holt_linear_winter(train["traffic_volume"], test["traffic_volume"], None, None,
                                                         "mul", None)
     holt_winter_mse = cal_mse(test["traffic_volume"], holt_winter_prediction)
@@ -153,86 +155,83 @@ if __name__ == "__main__":
 
     # Scaling the data using MixMax Scaler
     mm_scaler = MinMaxScaler()
-    lm_train_mm_scaled = pd.DataFrame(mm_scaler.fit_transform(lm_train), columns=lm_train.columns)
+    lm_train_mm_scaled = pd.DataFrame(
+        mm_scaler.fit_transform(lm_train[np.setdiff1d(lm_train.columns, ["traffic_volume"])]),
+        columns=np.setdiff1d(lm_train.columns, ["traffic_volume"]))
     lm_train_mm_scaled.set_index(lm_train.index, inplace=True)
+    lm_train_mm_scaled["traffic_volume"] = lm_train["traffic_volume"]
 
-    lm_test_mm_scaled = pd.DataFrame(mm_scaler.transform(lm_test), columns=lm_test.columns)
+    lm_test_mm_scaled = pd.DataFrame(mm_scaler.transform(lm_test[np.setdiff1d(lm_test.columns, ["traffic_volume"])]),
+                                     columns=np.setdiff1d(lm_test.columns, ["traffic_volume"]))
     lm_test_mm_scaled.set_index(lm_test.index, inplace=True)
+    lm_test_mm_scaled["traffic_volume"] = lm_test["traffic_volume"]
 
-    # aic = []
-    # bic = []
-    # r_squared = []
-    # adjusted_r_squared = []
-    # config = []
-    # mse = []
-    # rmse = []
+    # linear model using all variables
+    basic_model = normal_equation_using_statsmodels(
+        lm_train_mm_scaled[np.setdiff1d(lm_train_mm_scaled.columns, "traffic_volume")],
+        lm_train_mm_scaled["traffic_volume"], intercept=False)
 
-    features1 = np.setdiff1d(lm_train_mm_scaled.columns,
-                             ["clouds_all", "holiday_Christmas Day", "holiday_Columbus Day",
-                              "holiday_Independence Day", "holiday_Labor Day", "holiday_Martin Luther King Jr Day",
-                              "holiday_Memorial Day", "holiday_New Years Day", "holiday_Thanksgiving Day",
-                              "holiday_Washingtons Birthday"])
+    print()
+    print("The summary of linear model with all variables is:")
+    print(basic_model.summary())
 
-    config_list = [
-        #  (lm_train, lm_test, "Unscaled data with no intercept", False),
-        # (lm_train, lm_test, "Unscaled data with intercept", True),
-        # (lm_train_ss_scaled, lm_test_ss_scaled, "Standard Scaled data with no intercept", False),
-        # (lm_train_ss_scaled, lm_test_ss_scaled, "Standard Scaled data with intercept", True),
-        (lm_train_mm_scaled, lm_test_mm_scaled, "MinMax Scaled data with no intercept", False),
-        (lm_train_mm_scaled, lm_test_mm_scaled, "MinMax Scaled data with intercept", True),
-        (lm_train_mm_scaled[features1], lm_test_mm_scaled[features1],
-         "Feature Pruning using P-value and confidence interval", True)]
+    features = np.setdiff1d(lm_train_mm_scaled.columns,
+                            ["rain_1h", "holiday_Christmas Day", "holiday_Memorial Day", "holiday_Thanksgiving Day",
+                             "holiday_New Years Day", "holiday_Independence Day", "holiday_Labor Day", "clouds_all",
+                             "holiday_Washingtons Birthday", "holiday_Martin Luther King Jr Day"])
 
-    for train_data, test_data, config_string, intercept_value in config_list:
-        config_string, aic_value, bic_value, rsquared, rsquared_adj, mse1, rmse1, predictions = dumb1(train_data,
-                                                                                                      test_data,
-                                                                                                      config_string,
-                                                                                                      intercept_value)
+    # linear model using features which pass the t-test
+    pruned_model = normal_equation_using_statsmodels(lm_train_mm_scaled[np.setdiff1d(features, "traffic_volume")],
+                                                     lm_train_mm_scaled["traffic_volume"], intercept=False)
 
-        # config.append(config_string)
-        # aic.append(aic_value)
-        # bic.append(bic_value)
-        # r_squared.append(rsquared)
-        # adjusted_r_squared.append(rsquared_adj)
-        # mse.append(mse1)
-        # rmse.append(rmse1)
+    print()
+    print("The summary of linear model after feature selection:")
+    print(pruned_model.summary())
 
-    # lm_results = pd.DataFrame({"Configuration": config, "AIC": aic, "BIC": bic, "R Squared": r_squared,
-    #                            "Adjusted R Squared": adjusted_r_squared, "mse": mse, "rmse": rmse})
-    # sorted_lm = lm_results.sort_values("mse")
-    # print()
-    # print(sorted_lm.to_string())
+    # linear model predictions
+    lm_predictions = normal_equation_prediction_using_statsmodels(pruned_model, lm_test_mm_scaled[
+        np.setdiff1d(features, "traffic_volume")], intercept=False)
 
-    # TODO Feature Selection
-    # based on p-values; confidence interval
-    # Adjusted R-Squared of 0.937
+    # linear model mse
+    lm_mse = cal_mse(test["traffic_volume"], lm_predictions)
 
-    features1 = np.setdiff1d(lm_train_mm_scaled.columns,
-                             ["clouds_all", "holiday_Christmas Day",
-                              "holiday_Independence Day",
-                              "holiday_Labor Day", "holiday_Memorial Day", "holiday_New Years Day",
-                              "holiday_Thanksgiving Day",
-                              "holiday_Washingtons Birthday", "weather_main_Snow", "weather_main_Rain",
-                              "weather_main_Fog", "holiday_Martin Luther King Jr Day"])
+    print()
+    print("The MSE for Linear Model model is:")
+    print(lm_mse)
 
-    dumb1(lm_train_mm_scaled[features1], lm_test_mm_scaled[features1],
-          "Feature Pruning using P-value and confidence interval", False)
+    # linear model rmse
+    print()
+    print("The RMSE for Linear Model model is:")
+    print(np.sqrt(lm_mse))
 
-    # Adjusted R-Squared of 0.101 [Weather_main_clear changed the results!! and also not using intercept drastically
-    # changed the results!!]
-    # This is final LM model
-    features2 = np.setdiff1d(lm_train_mm_scaled.columns,
-                             ["clouds_all", "holiday_Labor Day", "holiday_Christmas Day",
-                              "holiday_New Years Day", "holiday_Thanksgiving Day", "holiday_Memorial Day",
-                              "holiday_Independence Day", "holiday_Washingtons Birthday",
-                              "holiday_Martin Luther King Jr Day", "weather_main_Clear", "weather_main_Fog",
-                              "weather_main_Clouds"])
+    # linear model residual
+    residuals_lm = cal_forecast_errors(list(test["traffic_volume"]), lm_predictions)
+    residual_autocorrelation = cal_auto_correlation(residuals_lm, len(lm_predictions))
 
-    config_string_final_scaled, aic_final_scaled, bic_final_scaled, rsquared_final_scaled, rsquared_adj_final_scaled, mse_final_scaled, rmse_final_scaled, prediction_final_scaled = dumb1(
-        lm_train_mm_scaled[features2], lm_test_mm_scaled[features2],
-        "Feature Pruning using P-value and confidence interval", False)
+    # linear model residual ACF
+    plot_acf(residual_autocorrelation, "ACF plot for Linear Model Residuals")
+
+    # linear model residual variance
+    print()
+    print("The Variance of residual for Linear Model model is:")
+    print(np.var(residuals_lm))
+
+    # linear model residual mean
+    print()
+    print("The Mean of residual for Linear Model model is:")
+    print(np.mean(residuals_lm))
+
+    # linear model Q value
+    Q_value_lm = box_pierce_test(len(test), residuals_lm, len(test))
+    print()
+    print("The Q Value of residuals for Linear Model model is:")
+    print(Q_value_lm)
+
+    result_performance = result_performance.append(
+        pd.DataFrame({"MSE": [holt_winter_mse], "Model": ["Holt Winter Model"]}))
+
     lm_predictions_scaled = lm_test_mm_scaled.copy(deep=True)
-    lm_predictions_scaled["traffic_volume"] = prediction_final_scaled
+    lm_predictions_scaled["traffic_volume"] = lm_predictions
 
     plot_multiline_chart_pandas_using_index([lm_train_mm_scaled, lm_test_mm_scaled, lm_predictions_scaled],
                                             "traffic_volume",
@@ -241,38 +240,11 @@ if __name__ == "__main__":
                                             "Traffic Volume Prediction Using Multiple Linear Model Scaled",
                                             rotate_xticks=True)
 
-    # # -----------------------
-    # # This is Final Model based on Non Scaled data
-    # features3 = np.setdiff1d(lm_train.columns,
-    #                          ["clouds_all", "holiday_Labor Day", "holiday_New Years Day",
-    #                           "holiday_Thanksgiving Day", "holiday_Memorial Day", "holiday_Christmas Day",
-    #                           "holiday_Independence Day", "weather_main_Snow", "month", "holiday_Washingtons Birthday",
-    #                           "weather_main_Rain", "weather_main_Fog", "holiday_Martin Luther King Jr Day"])
-    #
-    # config_string_final, aic_final, bic_final, rsquared_final, rsquared_adj_final, mse_final, rmse_final, prediction_final = dumb1(
-    #     lm_train[features3], lm_test[features3], "Feature Pruning using P-value and confidence interval", False)
-    #
-    # lm_predictions = lm_test.copy(deep=True)
-    # lm_predictions["traffic_volume"] = prediction_final
-    #
-    # plot_multiline_chart_pandas_using_index([lm_train, lm_test, lm_predictions], "traffic_volume",
-    #                                         ["Train", "Test", "Prediction"], ["Blue", "Orange", "Green"],
-    #                                         "Time", "Traffic Volume",
-    #                                         "Traffic Volume Prediction Using Multiple Linear Model",
-    #                                         rotate_xticks=True)
-
-    # TODO interpret correlation matrix and which columns to keep and whether to keep categorical variables? To check for multicolinearity!!
-    # Correlation Matrix with seaborn heatmap and pearson’s correlation coefficient
-    # Based on Correlation Matrix removed the  weather_main_Clear column which was causing the collinearity
-    # columns like clouds_all,
-    # based on multicollinearity
-
-    # least mse score for LM model is for mm model
-    # corr = lm_train[features3].corr()
-    # print()
-    # print(corr.to_string())
-    # print()
-    # plot_heatmap(corr, "Heatmap for Unscaled Linear Model")
+    # correlation coefficient for linear model after feature selection
+    corr = lm_train[features].corr()
+    label_ticks = ["Columbus Day", "No Holiday", "State Fair", "Veterans Day", "temp", "traffic_volume", "Clear",
+                   "Clouds", "Fog", "Rain", "Snow"]
+    plot_heatmap(corr, "Correlation Coefficient for Linear Model after feature selection", label_ticks, label_ticks, 45)
 
     # # --------------------------------------- ARMA ---------------------------------------------------------------
     # # # create GPAC Table
