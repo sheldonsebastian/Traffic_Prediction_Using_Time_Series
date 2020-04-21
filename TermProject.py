@@ -118,20 +118,50 @@ if __name__ == "__main__":
     plot_seasonal_decomposition(train["traffic_volume"], None, "Additive Residuals", "additive")
 
     # to keep track of performance for all the models
-    # TODO add variance and mean of residuals
-    result_performance = pd.DataFrame({"MSE": [], "Model": []})
+    result_performance = pd.DataFrame(
+        {"Model": [], "MSE": [], "RMSE": [], "Residual Mean": [], "Residual Variance": []})
 
     # --------------------------------------------------- HOLT WINTER----------------------------------------------
-    # TODO add ACF plots, RMSE, Mean of the residual, variance of residual
+    # holt winter prediction
     holt_winter_prediction = generic_holt_linear_winter(train["traffic_volume"], test["traffic_volume"], None, None,
                                                         "mul", None)
+    # holt winter mse
     holt_winter_mse = cal_mse(test["traffic_volume"], holt_winter_prediction)
 
-    print("The MSE for Holt Winter model using seasonality='mul' and trend='None' is:")
+    print()
+    print("The MSE for Holt Winter model is:")
     print(holt_winter_mse)
 
+    # holt winter rmse
+    holt_winter_rmse = np.sqrt(holt_winter_mse)
+    print()
+    print("The RMSE for Holt Winter model is:")
+    print(holt_winter_rmse)
+
+    # holt winter residual
+    residuals_holt_winter = cal_forecast_errors(list(test["traffic_volume"]), holt_winter_prediction)
+    residual_autocorrelation_holt_winter = cal_auto_correlation(residuals_holt_winter, len(holt_winter_prediction))
+
+    # holt winter residual variance
+    holt_winter_variance = np.var(residuals_holt_winter)
+    print()
+    print("The Variance of residual for Holt Winter model is:")
+    print(holt_winter_variance)
+
+    # holt winter residual mean
+    holt_winter_mean = np.mean(residuals_holt_winter)
+    print()
+    print("The Mean of residual for Holt Winter model is:")
+    print(holt_winter_mean)
+
+    # holt winter residual ACF
+    plot_acf(residual_autocorrelation_holt_winter, "ACF plot using Holt Winter Residuals")
+
+    # add the results to common dataframe
     result_performance = result_performance.append(
-        pd.DataFrame({"MSE": [holt_winter_mse], "Model": ["Holt Winter Model"]}))
+        pd.DataFrame(
+            {"Model": ["Holt Winter Model"], "MSE": [holt_winter_mse], "RMSE": [holt_winter_rmse],
+             "Residual Mean": [holt_winter_mean], "Residual Variance": [holt_winter_variance]}))
 
     # plot the predicted vs actual data
     holt_winter_df = test.copy(deep=True)
@@ -200,26 +230,29 @@ if __name__ == "__main__":
     print(lm_mse)
 
     # linear model rmse
+    lm_rmse = np.sqrt(lm_mse)
     print()
     print("The RMSE for Linear Model model is:")
-    print(np.sqrt(lm_mse))
+    print(lm_rmse)
 
     # linear model residual
     residuals_lm = cal_forecast_errors(list(test["traffic_volume"]), lm_predictions)
     residual_autocorrelation = cal_auto_correlation(residuals_lm, len(lm_predictions))
 
-    # linear model residual ACF
-    plot_acf(residual_autocorrelation, "ACF plot for Linear Model Residuals")
-
     # linear model residual variance
+    lm_variance = np.var(residuals_lm)
     print()
     print("The Variance of residual for Linear Model model is:")
-    print(np.var(residuals_lm))
+    print(lm_variance)
 
     # linear model residual mean
+    lm_mean = np.mean(residuals_lm)
     print()
     print("The Mean of residual for Linear Model model is:")
-    print(np.mean(residuals_lm))
+    print(lm_mean)
+
+    # linear model residual ACF
+    plot_acf(residual_autocorrelation, "ACF plot for Linear Model Residuals")
 
     # linear model Q value
     Q_value_lm = box_pierce_test(len(test), residuals_lm, len(test))
@@ -227,9 +260,13 @@ if __name__ == "__main__":
     print("The Q Value of residuals for Linear Model model is:")
     print(Q_value_lm)
 
+    # add the results to common dataframe
     result_performance = result_performance.append(
-        pd.DataFrame({"MSE": [holt_winter_mse], "Model": ["Holt Winter Model"]}))
+        pd.DataFrame(
+            {"Model": ["Multiple Linear Regression Model"], "MSE": [lm_mse], "RMSE": [lm_rmse],
+             "Residual Mean": [lm_mean], "Residual Variance": [lm_variance]}))
 
+    # plot the actual vs predicted values
     lm_predictions_scaled = lm_test_mm_scaled.copy(deep=True)
     lm_predictions_scaled["traffic_volume"] = lm_predictions
 
