@@ -1057,16 +1057,26 @@ def statsmodels_plot_predicted_true(y, model_hat, n_a, n_b):
                                 f"ARMA process with n_a={n_a} and n_b={n_b}")
 
 
-def statsmodels_get_roots_AR(model):
-    return model.arroots
+def statsmodels_print_roots_AR(model):
+    print("Real part:")
+    for root in model.arroots:
+        print(root.real)
+    print("Imaginary part:")
+    for root in model.arroots:
+        print(root.imag)
 
 
-def statsmodels_get_roots_MA(model):
-    return model.maroots
+def statsmodels_print_roots_MA(model):
+    print("Real part:")
+    for root in model.maroots:
+        print(root.real)
+    print("Imaginary part:")
+    for root in model.maroots:
+        print(root.imag)
 
 
 # check whether order passes chi square test
-def gpac_order_chi_square_test(possible_order_ARMA, train_data, start, stop, lags, actual_outputs, add_mean_to_train=0):
+def gpac_order_chi_square_test(possible_order_ARMA, train_data, start, stop, lags, actual_outputs):
     results = []
 
     for n_a, n_b in possible_order_ARMA:
@@ -1076,7 +1086,6 @@ def gpac_order_chi_square_test(possible_order_ARMA, train_data, start, stop, lag
 
             # predict the traffic_volume on test data
             predictions = statsmodels_predict_ARMA_process(model, start=start, stop=stop)
-            predictions = np.add(predictions, add_mean_to_train)
 
             # calculate forecast errors
             residuals = cal_forecast_errors(actual_outputs, predictions)
@@ -1084,12 +1093,12 @@ def gpac_order_chi_square_test(possible_order_ARMA, train_data, start, stop, lag
             # autocorrelation of residuals
             re = cal_auto_correlation(residuals, lags)
 
+            # compute Q value for chi square test
             Q = Q_value(actual_outputs, re)
 
             # checking the chi square test
             if chi_square_test(Q, lags, n_a, n_b):
-                print("Success")
-                results.append((n_a, n_b, True))
+                results.append((n_a, n_b))
 
         except Exception as e:
             # print(e)
