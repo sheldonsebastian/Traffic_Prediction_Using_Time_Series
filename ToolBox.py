@@ -1105,3 +1105,37 @@ def gpac_order_chi_square_test(possible_order_ARMA, train_data, start, stop, lag
             pass
 
     return results
+
+
+# check whether order passes chi square test
+def gpac_order_chi_square_test2(possible_order_ARMA, train_data, start, stop, lags, actual_outputs, mean_to_add):
+    results = []
+
+    for n_a, n_b in possible_order_ARMA:
+        try:
+            # estimate the model parameters
+            model = statsmodels_estimate_parameters(n_a, n_b, train_data)
+
+            # predict the traffic_volume on test data
+            predictions = statsmodels_predict_ARMA_process(model, start=start, stop=stop)
+            predictions = np.add(predictions, mean_to_add)
+
+            # calculate forecast errors
+            residuals = cal_forecast_errors(actual_outputs, predictions)
+
+            # autocorrelation of residuals
+            re = cal_auto_correlation(residuals, lags)
+
+            # compute Q value for chi square test
+            Q = Q_value(actual_outputs, re)
+
+            # checking the chi square test
+            if chi_square_test(Q, lags, n_a, n_b):
+                print("Pass")
+                results.append((n_a, n_b))
+
+        except Exception as e:
+            # print(e)
+            pass
+
+    return results

@@ -10,7 +10,8 @@ from ToolBox import split_df_train_test, plot_line_using_pandas_index, cal_auto_
     plot_multiline_chart_pandas_using_index, normal_equation_using_statsmodels, \
     normal_equation_prediction_using_statsmodels, cal_mse, cal_forecast_errors, box_pierce_test, adf_cal, \
     plot_seasonal_decomposition, generic_holt_linear_winter, statsmodels_predict_ARMA_process, \
-    statsmodels_print_covariance_matrix, statsmodels_print_variance_error
+    statsmodels_print_covariance_matrix, statsmodels_print_variance_error, gpac_order_chi_square_test2, \
+    generic_average_method
 
 if __name__ == "__main__":
     # pandas print options
@@ -92,6 +93,40 @@ if __name__ == "__main__":
     # split into train and test(20%) dataset
     train, test = split_df_train_test(traffic_resampled, 0.2)
 
+    # to keep track of performance for all the models
+    result_performance = pd.DataFrame(
+        {"Model": [], "MSE": [], "RMSE": [], "Residual Mean": [], "Residual Variance": []})
+
+    # average model
+    average_predictions = generic_average_method(train["traffic_volume"], len(test["traffic_volume"]))
+
+    # plot the predicted vs actual data
+    average_df = test.copy(deep=True)
+    average_df["traffic_volume"] = average_predictions
+
+    plot_multiline_chart_pandas_using_index([train, test, average_df], "traffic_volume",
+                                            ["Train", "Test", "Prediction"], ["Blue", "Orange", "Green"],
+                                            "Time", "Traffic Volume",
+                                            "Traffic Volume Prediction Using Average",
+                                            rotate_xticks=True)
+
+    avg_mse = cal_mse(test["traffic_volume"], average_predictions)
+    avg_rmse = np.sqrt(avg_mse)
+
+    residuals_avg = cal_forecast_errors(test["traffic_volume"], average_predictions)
+
+    avg_mean = np.mean(residuals_avg)
+    avg_variance = np.var(residuals_avg)
+
+    residual_autocorrelation_holt_winter = cal_auto_correlation(residuals_avg, len(average_predictions))
+    plot_acf(residual_autocorrelation_holt_winter, "ACF plot using Average Residuals")
+
+    # add the results to common dataframe
+    result_performance = result_performance.append(
+        pd.DataFrame(
+            {"Model": ["Average Model"], "MSE": [avg_mse], "RMSE": [avg_rmse],
+             "Residual Mean": [avg_mean], "Residual Variance": [avg_variance]}))
+
     # dimension of train data
     print()
     print("The dimension of train data is:")
@@ -113,10 +148,6 @@ if __name__ == "__main__":
     # the train dataframe already has DateTimeIndex as index which specified the frequency as 'D'
     plot_seasonal_decomposition(train["traffic_volume"], None, "Multiplicative Residuals", "multiplicative")
     plot_seasonal_decomposition(train["traffic_volume"], None, "Additive Residuals", "additive")
-
-    # to keep track of performance for all the models
-    result_performance = pd.DataFrame(
-        {"Model": [], "MSE": [], "RMSE": [], "Residual Mean": [], "Residual Variance": []})
 
     print("--------------------------------------- HOLT WINTER ---------------------------------------")
     # holt winter prediction
@@ -299,7 +330,8 @@ if __name__ == "__main__":
     plot_heatmap(gpac_table, "GPAC Table for Traffic Volume")
 
     # estimate the order of the process
-    possible_order = [(2, 0), (2, 5), (2, 7), (4, 0), (4, 2), (4, 5), (4, 7), (4, 10), (6, 5), (7, 0), (7, 8), (10, 3)]
+    # possible_order = [(2, 0), (2, 5), (2, 7), (4, 0), (4, 2), (4, 5), (4, 7), (4, 10), (6, 5), (7, 0), (7, 8), (10, 3)]
+    possible_order = []
     print()
     print("The possible orders for ARMA process are:")
     print(possible_order)
@@ -396,3 +428,91 @@ if __name__ == "__main__":
     print()
     print("The performance metrics for all the models is shown:")
     print(result_performance.to_string())
+
+    print("--------------------------------------- ARMA 2 ---------------------------------------")
+    n_a = 4
+    n_b = 1
+    y2 = np.subtract(train["traffic_volume"], np.mean(train["traffic_volume"]))
+    model = statsmodels_estimate_parameters(n_a, n_b, y2)
+
+    gpac_order_chi_square_test2([(n_a, n_b)], y2, "2018-05-07 00:00:00", "2018-09-30 00:00:00", lags,
+                                test["traffic_volume"], np.mean(train["traffic_volume"]))
+
+    # # print the estimated paramters
+    # print()
+    # print(f"The estimated parameters for ARMA({n_a}, {n_b}) are:")
+    # statsmodels_print_parameters(model, n_a, n_b)
+    #
+    # # print the confidence interval for the estimated parameters
+    # statsmodels_print_confidence_interval(model, n_a, n_b)
+    #
+    # # AR roots (denominator)
+    # print("The roots of denominator(AR) are:")
+    # statsmodels_print_roots_AR(model)
+    #
+    # # MA roots (numerator)
+    # print()
+    # print("The roots of numerator(MA) are:")
+    # statsmodels_print_roots_MA(model)
+    # print()
+    #
+    # # ARMA predictions
+    # arma_prediction = statsmodels_predict_ARMA_process(model, "2018-05-07 00:00:00", "2018-09-30 00:00:00")
+    #
+    # # ARMA mse
+    # arma_mse = cal_mse(test["traffic_volume"], np.add(arma_prediction, np.mean(train["traffic_volume"])))
+    #
+    # print("The MSE for ARMA model is:")
+    # print(arma_mse)
+    #
+    # # ARMA rmse
+    # arma_rmse = np.sqrt(arma_mse)
+    # print()
+    # print("The RMSE for ARMA model is:")
+    # print(arma_rmse)
+    #
+    # # ARMA residual
+    # residuals_arma = cal_forecast_errors(list(test["traffic_volume"]), arma_prediction)
+    #
+    # # ARMA residual variance
+    # arma_variance = np.var(residuals_arma)
+    # print()
+    # print("The Variance of residual for ARMA model is:")
+    # print(arma_variance)
+    #
+    # # ARMA residual mean
+    # arma_mean = np.mean(residuals_arma)
+    # print()
+    # print("The Mean of residual for ARMA model is:")
+    # print(arma_mean)
+    #
+    # # ARMA residual ACF
+    # residual_autocorrelation_arma = cal_auto_correlation(residuals_arma, len(arma_prediction))
+    # plot_acf(residual_autocorrelation_arma, "ACF plot using ARMA Residuals")
+    #
+    # # ARMA covariance matrix
+    # print()
+    # statsmodels_print_covariance_matrix(model, n_a, n_b)
+    #
+    # # ARMA estimated variance of error
+    # statsmodels_print_variance_error(model, n_a, n_b)
+    #
+    # # add the results to common dataframe
+    # result_performance = result_performance.append(
+    #     pd.DataFrame(
+    #         {"Model": ["ARMA Model"], "MSE": [arma_mse], "RMSE": [arma_rmse],
+    #          "Residual Mean": [arma_mean], "Residual Variance": [arma_variance]}))
+    #
+    # # plot the predicted vs actual data
+    # arma_df = test.copy(deep=True)
+    # arma_df["traffic_volume"] = arma_prediction
+    #
+    # plot_multiline_chart_pandas_using_index([train, test, arma_df], "traffic_volume",
+    #                                         ["Train", "Test", "Prediction"], ["Blue", "Orange", "Green"],
+    #                                         "Time", "Traffic Volume",
+    #                                         "Traffic Volume Prediction Using ARMA",
+    #                                         rotate_xticks=True)
+    #
+    # print()
+    # print("The performance metrics for all the models is shown:")
+    # print(result_performance.to_string())
