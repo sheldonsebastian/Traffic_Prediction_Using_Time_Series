@@ -124,7 +124,7 @@ if __name__ == "__main__":
     result_performance = pd.DataFrame(
         {"Model": [], "MSE": [], "RMSE": [], "Residual Mean": [], "Residual Variance": []})
 
-    # --------------------------------------------------- HOLT WINTER----------------------------------------------
+    print("--------------------------------------- HOLT WINTER ---------------------------------------")
     # holt winter prediction
     holt_winter_prediction = generic_holt_linear_winter(train["traffic_volume"], test["traffic_volume"], None, None,
                                                         "mul", None)
@@ -176,7 +176,7 @@ if __name__ == "__main__":
                                             "Traffic Volume Prediction Using Holt Winter",
                                             rotate_xticks=True)
 
-    # ----------------------------------------------- MULTIPLE LINEAR REGRESSION----------------------------------
+    print("--------------------------------------- MULTIPLE LINEAR REGRESSION-----------------------------")
     lm_combined = combined_data.copy(deep=True)
 
     # convert categorical into numerical columns
@@ -277,7 +277,7 @@ if __name__ == "__main__":
                                             "traffic_volume",
                                             ["Train", "Test", "Prediction"], ["Blue", "Orange", "Green"],
                                             "Time", "Traffic Volume",
-                                            "Traffic Volume Prediction Using Multiple Linear Model Scaled",
+                                            "Traffic Volume Prediction Using Multiple Linear Model",
                                             rotate_xticks=True)
 
     # correlation coefficient for linear model after feature selection
@@ -286,7 +286,7 @@ if __name__ == "__main__":
                    "Clouds", "Fog", "Rain", "Snow"]
     plot_heatmap(corr, "Correlation Coefficient for Linear Model after feature selection", label_ticks, label_ticks, 45)
 
-    # --------------------------------------- ARMA ---------------------------------------------------------------
+    print("--------------------------------------- ARMA ---------------------------------------")
     j = 12
     k = 12
     lags = j + k
@@ -297,6 +297,8 @@ if __name__ == "__main__":
 
     # create GPAC Table
     gpac_table = create_gpac_table(j, k, ry)
+    print()
+    print("GPAC Table:")
     print(gpac_table.to_string())
     print()
 
@@ -375,6 +377,7 @@ if __name__ == "__main__":
     plot_acf(residual_autocorrelation_arma, "ACF plot using ARMA Residuals")
 
     # ARMA covariance matrix
+    print()
     statsmodels_print_covariance_matrix(model, n_a, n_b)
 
     # ARMA estimated variance of error
@@ -395,3 +398,7 @@ if __name__ == "__main__":
                                             "Time", "Traffic Volume",
                                             "Traffic Volume Prediction Using ARMA",
                                             rotate_xticks=True)
+
+    print()
+    print("The performance metrics for all the models is shown:")
+    print(result_performance.to_string())
