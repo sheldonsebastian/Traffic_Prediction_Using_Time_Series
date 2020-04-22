@@ -16,12 +16,6 @@ if __name__ == "__main__":
     # pandas print options
     pd.set_option("max_columns", 10)
 
-    # TODO refactor for variable names
-    # TODO code comments
-    # TODO put appropriate Print Commands and run code from console before submitting!!
-    # TODO reverse scale transform the outputs of Linear model to get consistent MSE
-    # TODO compare MSE for centered and uncentered ARMA process
-
     # ignore warnings
     warnings.filterwarnings("ignore")
 
