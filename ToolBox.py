@@ -1066,7 +1066,7 @@ def statsmodels_get_roots_MA(model):
 
 
 # check whether order passes chi square test
-def gpac_order_chi_square_test(possible_order_ARMA, train_data, start, stop, lags, actual_outputs):
+def gpac_order_chi_square_test(possible_order_ARMA, train_data, start, stop, lags, actual_outputs, add_mean_to_train=0):
     results = []
 
     for n_a, n_b in possible_order_ARMA:
@@ -1076,6 +1076,7 @@ def gpac_order_chi_square_test(possible_order_ARMA, train_data, start, stop, lag
 
             # predict the traffic_volume on test data
             predictions = statsmodels_predict_ARMA_process(model, start=start, stop=stop)
+            predictions = np.add(predictions, add_mean_to_train)
 
             # calculate forecast errors
             residuals = cal_forecast_errors(actual_outputs, predictions)
@@ -1087,6 +1088,7 @@ def gpac_order_chi_square_test(possible_order_ARMA, train_data, start, stop, lag
 
             # checking the chi square test
             if chi_square_test(Q, lags, n_a, n_b):
+                print("Success")
                 results.append((n_a, n_b, True))
 
         except Exception as e:

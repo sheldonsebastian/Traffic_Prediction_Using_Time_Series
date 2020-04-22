@@ -2,12 +2,13 @@ import warnings
 
 import numpy as np
 import pandas as pd
+import winsound
 
 from ToolBox import split_df_train_test, plot_line_using_pandas_index, cal_auto_correlation, plot_acf, plot_heatmap, \
     plot_multiline_chart_pandas_using_index, cal_mse, \
     cal_forecast_errors, \
     create_gpac_table, statsmodels_estimate_parameters, \
-    statsmodels_predict_ARMA_process, Q_value, chi_square_test, statsmodels_print_parameters
+    statsmodels_predict_ARMA_process, Q_value, chi_square_test, statsmodels_print_parameters, gpac_order_chi_square_test
 
 if __name__ == "__main__":
     # pandas print options
@@ -284,52 +285,21 @@ if __name__ == "__main__":
     # plot_heatmap(corr, "Correlation Coefficient for Linear Model after feature selection", label_ticks, label_ticks, 45)
 
     # --------------------------------------- ARMA ---------------------------------------------------------------
-    # create GPAC Table
     j = 12
     k = 12
     lags = j + k
     ry = cal_auto_correlation(train["traffic_volume"], lags)
+
+    # create GPAC Table
     gpac_table = create_gpac_table(j, k, ry)
     print(gpac_table.to_string())
 
     plot_heatmap(gpac_table, "GPAC Table for Traffic Volume")
 
     # estimate the order of the process
-    possible_order = [(n_a, n_b) for n_a in range(1, j + 1) for n_b in range(k)]
+    possible_order = [(6, 5)]
 
-    print()
+    pass_order = gpac_order_chi_square_test(possible_order, train["traffic_volume"], "2018-05-07 00:00:00",
+                                            "2018-09-30 00:00:00", lags, test["traffic_volume"])
 
-    for n_a, n_b in possible_order:
-        try:
-            # estimate the model parameters
-            model = statsmodels_estimate_parameters(n_a, n_b, traffic_resampled["traffic_volume"])
-
-            # predict the traffic_volume on test data
-            predictions = statsmodels_predict_ARMA_process(model, start="2018-05-07 00:00:00",
-                                                           stop="2018-09-30 00:00:00")
-
-            residuals = cal_forecast_errors(list(test["traffic_volume"]), list(predictions))
-            re = cal_auto_correlation(residuals, lags)
-
-            # confused here should it be test or train? => definitely should be test since the residual size
-            # corresponds to the size of test data
-            Q = Q_value(test, re)
-
-            # does it pass the chi square test?
-            if chi_square_test(Q, lags, n_a, n_b, alpha=0.01):
-                print("Success", n_a, n_b)
-
-        except Exception as e:
-            print(e)
-
-    # TODO I am stuck cause I have only one model instead of 2 ARMA process models, Hmmmmmmmm try professor's
-    #  technique of using previous values as input !!
-
-    # OR Subtract mean from the data to relax contraint for ARMA
-
-    # TODO finally simplify model!!
-
-    # zero pole cancellation
-
-    # winsound.Beep(2000, 2000)
     print("Finished")
