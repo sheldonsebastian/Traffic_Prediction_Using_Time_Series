@@ -458,7 +458,8 @@ if __name__ == "__main__":
     print()
     print("The possible orders identified from GPAC for ARMA process are:")
     print(possible_order2)
-    print("We noticed that none of the identified ARMA order pass the GPAC table.")
+    print()
+    print("We noticed that none of the identified ARMA order from the GPAC table pass the chi squared test.")
     print()
 
     # # checking which orders pass the GPAC test
@@ -466,9 +467,8 @@ if __name__ == "__main__":
     #                                  lags,
     #                                  test["traffic_volume"], y_mean))
 
-    print()
     print(
-        "Thus we try for all possible combinations of GPAC table in a brute force manner; \n"
+        "Thus we try for all possible combinations of orders from the GPAC table in a brute force manner; \n"
         "the ARMA(4,6) passes the Chi Square test, but shows no pattern in GPAC table;\n"
         "this might be possible since we have only 584 samples in the training data.")
 
