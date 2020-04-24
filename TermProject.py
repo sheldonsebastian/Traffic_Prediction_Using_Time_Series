@@ -453,20 +453,28 @@ if __name__ == "__main__":
 
     # # estimate the order of the process
     # # the possible orders identified from GPAC table don't pass the chi square test
-    # possible_order = [(2, 5), (2, 7), (4, 0), (4, 2), (4, 5), (4, 7), (6, 5), (10, 3)]
+    possible_order2 = [(2, 5), (2, 7), (4, 0), (4, 2), (4, 5), (4, 7), (6, 5), (10, 3)]
 
-    # print()
-    # print("The possible orders for ARMA process are:")
-    # print(possible_order)
-    # print()
+    print()
+    print("The possible orders identified from GPAC for ARMA process are:")
+    print(possible_order2)
+    print("We noticed that none of the identified ARMA order pass the GPAC table.")
+    print()
 
     # # checking which orders pass the GPAC test
-    # print(gpac_order_chi_square_test(possible_order, y, '2018-05-07 00:00:00', '2018-09-30 00:00:00',
+    # print(gpac_order_chi_square_test(possible_order2, y, '2018-05-07 00:00:00', '2018-09-30 00:00:00',
     #                                  lags,
     #                                  test["traffic_volume"], y_mean))
+
     print()
     print(
-        "After trying for all possible combinations of GPAC table, the ARMA(4,6) passes the Chi Square test, but there is no pattern in GPAC table.")
+        "Thus we try for all possible combinations of GPAC table in a brute force manner; \n"
+        "the ARMA(4,6) passes the Chi Square test, but shows no pattern in GPAC table;\n"
+        "this might be possible since we have only 584 samples in the training data.")
+
+    print()
+    print("The ARMA(4,6) model summary is:")
+
     possible_order = [(4, 6)]
     gpac_order_chi_square_test(possible_order, y, '2018-05-07 00:00:00', '2018-09-30 00:00:00',
                                lags, actual_output)
@@ -475,8 +483,6 @@ if __name__ == "__main__":
     n_b = 6
 
     model = statsmodels_estimate_parameters(n_a, n_b, y)
-    print()
-    print("The ARMA(4,6) model summary is:")
     print(model.summary())
 
     # ARMA predictions
@@ -542,4 +548,4 @@ if __name__ == "__main__":
 # -------------------------------------------Final Performance Metrics----------------------
 print()
 print("The performance metrics for all the models is shown:")
-print(result_performance.sort_values(["RMSE"]).to_string())
+print(result_performance.sort_values(["RMSE"]).reset_index(drop=True).to_string())
