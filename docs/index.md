@@ -18,13 +18,7 @@ We are predicting the traffic volume per day for the I94 interstate. The traffic
 ## Table of contents
 
 1. Introduction
-2. Data description
-	a. Resampling strategy
-	b. Summary statistics and data preprocessing
-	c. Traffic Volume plot over time
-	d. ACF of traffic volume
-	e. Correlation Coefficient Matrix
-	f. Data splitting strategy
+2. Data description and preprocessing
 3. Stationarity check
 4. Average Model
 5. Naive Model
@@ -57,7 +51,7 @@ For the Linear Regression Model, we will scale the feature variables and perform
 Once all the models are created, we will compare the performance and recommend the best performing model.
 </div>
 
-## Data description
+## Data description and preprocessing
 
 <div style="text-align: justify">
 The dataset has hourly traffic volume from October 2012 to September 2018. Traffic volume is defined as count of cars in an hour on the interstate. As described previously, the hourly traffic volume is tracked between Minneapolis and St Paul, MN.
@@ -66,10 +60,11 @@ The dataset has hourly traffic volume from October 2012 to September 2018. Traff
 The dataset is sourced from the following website:<br>
 https://archive.ics.uci.edu/ml/datasets/Metro+Interstate+Traffic+Volume
 
-<div>
+</div>
 
-### a. Resampling strategy
-
+<br>
+<b>Resampling strategy</b>
+<br>
 <div style="text-align: justify">
 For computational purposes and model interpretability the hourly data was resampled into daily data. Also, we are focusing on traffic volume data for September 2016 to September 2018.
 </div>
@@ -84,11 +79,46 @@ When we perform resampling the following functions were applied to the variables
 After resampling the shape of the dataset is <b>(731,7)</b>.
 </div>
 
-### b. Summary statistics and data preprocessing
-### c. Traffic Volume plot over time
-### d. ACF of traffic volume
-### e. Correlation Coefficient Matrix
-### f. Data splitting strategy
+<br>
+<b>Summary Statistics</b>
+<br>
+
+<div style="text-align: justify">
+The summary statistics for numeric columns are as follows:<br>
+<center><img src="saved_images/img2.jpg"/></center>
+We notice that the snow_1h column has all values as zero, thus we remove that column.
+<br><br>
+The summary statistics for categorical columns are as follows:<br>
+<center><img src="saved_images/img3.jpg"/></center>
+We notice that the holiday column has 22 values only, thus we replace all the other NaN values with “No Holiday” values. After replacing all the holiday NaN columns with 'No Holiday' value we get value counts for holiday column as:
+<br>
+<center><img src="saved_images/img4.jpg"/></center>
+<br>
+We also notice that the weather_main column contains 9 unique values which are:
+<br>
+<center><img src="saved_images/img5.jpg"/></center>
+<br>
+We condense this information as follows:
+<ul>
+<li>Rain additionally covers the values Drizzle, Thunderstorm</li>
+<li>Fog additionally covers the values Mist, Haze, Smoke</li>
+</ul>
+<br>
+Thus, after condensing the value counts are as follows:
+<br>
+<center><img src="saved_images/img6.jpg"/></center>
+<br>
+Finally, after resampling and data cleaning the column count with NaN values are:
+<br>
+<center><img src="saved_images/img7.jpg"/></center>
+<br>
+Hence, we do not need to perform any data imputation.
+</div>
+
+<br>
+<b>Summary Statistics</b>
+<br>
+
 
 ## References
 
