@@ -272,8 +272,8 @@ The performance measures for the Holt Winters Model are as follows:
 <th>Residual Mean</th>
 </tr>
 <tr>
-<td>84690.827</td>
 <td>291.017</td>
+<td>84690.827</td>
 <td>84197.577</td>
 <td>-22.209</td>
 </tr>
@@ -289,6 +289,84 @@ ACF of residuals: We notice that the ACF plot for Holt Winter method resembles t
 <center><img src="saved_images/img20.jpg"/></center>
 
 ## 9. Multiple Linear Regression
+
+### Linear Model with all Features:
+
+<div style="text-align: justify">
+We will now perform multiple linear regression and for this we need to scale the data and convert the categorical columns into numerical columns.
+<br><br>
+We scale the feature variables using sklearn.preprocessing’s MinMaxScaler function and then compute the MSE values for the test data and the predicted values.
+<br><br>
+We convert the categorical values into numerical values by using pandas get_dummies(…) function.
+</div>
+<br>
+The summary of linear model with all variables is:
+<center><img src="saved_images/img21.jpg"/></center>
+
+<br>
+Conclusions based on above summary:<br>
+F-test : The F-test passes since the Prob(F-statistics) is less than 0.05 and thus our model performs better than null model.<br>
+AIC: The AIC value is 9028<br>
+BIC: The BIC value is 9111<br>
+T-test: There are variables which fail the t-test, to fix this we drop the variables which fail the t-test.
+<br>
+
+### Linear Model after Feature Selection:
+
+<div style="text-align: justify">
+Since there are variables which fail the t-test when we use all variables model, we remove these variables and repeat the linear model process until all the variables pass the t-test.
+</div>
+
+The summary of linear model after feature selection is:
+<center><img src="saved_images/img22.jpg"/></center>
+
+<br>
+Conclusions based on above model:<br>
+
+F-test: The Prob(F-statistics) < 0.05 thus our model performs better than the null model and it passes the F-test.<br>
+AIC: The AIC value is 9016 which is lower than all variables model.<br>
+BIC: The BIC value is 9060 which is lower than all variables model.<br>
+T-test: The t-test passes for all variables since the P(t) < 0.05 for all variables.<br>
+R-Squared: The R-squared value is 0.115<br>
+Adjusted R-squared: The adjusted R-squared value is 0.101 which is better than all variables model.<br><br>
+
+The performance measures for the Linear Model after feature selection are as follows:
+
+<table>
+<tr>
+<th>RMSE</th>
+<th>MSE</th>
+<th>Residual Variance</th>
+<th>Residual Mean</th>
+</tr>
+<tr>
+<td>506.384</td>
+<td>256424.508</td>
+<td>255166.372</td>
+<td>-35.470</td>
+</tr>
+</table>
+<br>
+
+ACF of residuals:<br>
+We observe the residuals are decaying in ACF plot, but they do not resemble a white noise.
+
+<center><img src="saved_images/img23.jpg"/></center>
+<br>
+The Q value of residuals of Linear Model is: 1333.365
+<br><br>
+
+<b>Correlation Coefficient Matrix:</b><br>
+The correlation coefficient matrix includes only those variables which have been used for final linear model. After feature selection the final independent features are:<br>
+holiday_Columbus Day, holiday_No Holiday, holiday_State Fair, holiday_Veterans Day, temp, weather_main_Clear, weather_main_Clouds, weather_main_Fog, weather_main_Rain, and weather_main_Snow.
+<br><br>
+
+We notice there is no strong relationship between the variables and thus no multicollinearity is present. The correlation coefficient matrix is as follows:<br>
+<center><img src="saved_images/img24.jpg"/></center>
+<br>
+The plot for linear model prediction along with actual predictions is shown below:
+<br>
+<center><img src="saved_images/img25.jpg"/></center>
 
 ## 10. ARMA model
 
