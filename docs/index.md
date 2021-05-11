@@ -158,8 +158,7 @@ From ADF test we conclude that traffic volume is stationary.
 We compute the mean of training data and perform h step predictions to match the size of the test data. The model statistics are as follows:<br>
 </div>
 
-<center>
-<table>
+<table align="center">
 <tr>
 <th>RMSE</th>
 <th>MSE</th>
@@ -173,7 +172,6 @@ We compute the mean of training data and perform h step predictions to match the
 <td>55.477</td>
 </tr>
 </table>
-</center>
 
 <br>
 The plot of forecasted values with the actual value is shown below:
