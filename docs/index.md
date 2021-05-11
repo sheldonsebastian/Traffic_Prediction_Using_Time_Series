@@ -31,7 +31,7 @@ We are predicting the traffic volume per day for the I94 interstate. The traffic
 12. Conclusion
 
 
-## Introduction
+## 1. Introduction
 <div style="text-align: justify">
 We are predicting the number of cars in a day on the I94 interstate between St. Paul and Minneapolis as shown in the below figure:
 </div>
@@ -51,7 +51,7 @@ For the Linear Regression Model, we will scale the feature variables and perform
 Once all the models are created, we will compare the performance and recommend the best performing model.
 </div>
 
-## Data description and preprocessing
+## 2. Data description and preprocessing
 
 <div style="text-align: justify">
 The dataset has hourly traffic volume from October 2012 to September 2018. Traffic volume is defined as count of cars in an hour on the interstate. As described previously, the hourly traffic volume is tracked between Minneapolis and St Paul, MN.
@@ -140,9 +140,9 @@ We notice that the ACF values show decay at lag = 200.
 We split the resampled data into train and test datasets. The dimension for train dataset is <b>(584,6)</b>. The dimension for test dataset is <b>(147,6)</b>
 </div>
 
-<br>
-<b>Stationarity Check</b>
-<br>
+
+## 3. Stationarity check
+
 <div style="text-align: justify">
 To check if traffic volume is stationary or not, we perform the ADF test.
 <br>
@@ -151,6 +151,41 @@ To check if traffic volume is stationary or not, we perform the ADF test.
 From ADF test we conclude that traffic volume is stationary.
 </div>
 
+
+## 4. Average Model
+
+<div style="text-align: justify">
+We compute the mean of training data and perform h step predictions to match the size of the test data. The model statistics are as follows:<br>
+</div>
+
+|RMSE|MSE|Residual Variance|Residual Mean|
+|-----|----|----------------|------------|
+|531.918|282937.565|279859.840|55.477|
+
+<br>
+The plot of forecasted values with the actual value is shown below:
+<center><img src="saved_images/img11.jpg"/></center>
+<br><br>
+The ACF of residuals is as follows:
+<center><img src="saved_images/img12.jpg"/></center>
+<br>
+We conclude that the ACF plot does not resemble white noise.
+
+## 5. Naive Model
+
+## 6. Drift Model
+
+## 7. Time series decomposition
+
+## 8. Holt Winters method
+
+## 9. Multiple Linear Regression
+
+## 10. ARMA model
+
+## 11. Best Model
+
+## 12. Conclusion
 
 ## References
 
