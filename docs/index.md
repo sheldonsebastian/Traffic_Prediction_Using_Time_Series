@@ -185,11 +185,108 @@ We conclude that the ACF plot does not resemble white noise.
 
 ## 5. Naive Model
 
+<div style="text-align: justify">
+We find the last sample of training data and perform h step predictions to match the size of the test data.
+</div>
+<br>
+The model statistics are as follows:<br>
+<table>
+<tr>
+<th>RMSE</th>
+<th>MSE</th>
+<th>Residual Variance</th>
+<th>Residual Mean</th>
+</tr>
+<tr>
+<td>1091.679</td>
+<td>1191763.077</td>
+<td>279859.840</td>
+<td>954.936</td>
+</tr>
+</table>
+
+<br>
+The plot of forecasted values with the actual value is shown below:
+<center><img src="saved_images/img13.jpg"/></center>
+<br><br>
+The ACF of residuals is as follows:
+<center><img src="saved_images/img14.jpg"/></center>
+<br>
+We conclude that the ACF plot does not resemble white noise.
+
 ## 6. Drift Model
+
+The performance measures for the Drift Model are as follows:
+
+<table>
+<tr>
+<th>RMSE</th>
+<th>MSE</th>
+<th>Residual Variance</th>
+<th>Residual Mean</th>
+</tr>
+<tr>
+<td>1223.722</td>
+<td>1497497.754</td>
+<td>284349.208</td>
+<td>1101.430</td>
+</tr>
+</table>
+
+<br>
+The plot of forecasted values with the actual value is shown below:
+<center><img src="saved_images/img15.jpg"/></center>
+<br><br>
+The ACF of residuals is as follows:
+<center><img src="saved_images/img16.jpg"/></center>
+<br>
+We conclude that the ACF plot does not resemble white noise.
 
 ## 7. Time series decomposition
 
+<div style="text-align: justify">
+We will decompose traffic volume to comprehend whether trend and seasonality are additive or multiplicative.<br>
+The Multiplicative time series decomposition plot is shown below:
+</div>
+<center><img src="saved_images/img17.jpg"/></center>
+<br>The Additive time series decomposition plot is shown below:<br>
+<center><img src="saved_images/img18.jpg"/></center>
+<div style="text-align: justify">
+We notice that the additive residuals have high variance and it ranges from +1000 to -1000, whereas all the multiplicative residuals are close to one.<br><br>
+Thus, the multiplicative decomposition best represents the traffic volume data and we see a strong seasonality component but there is no trend visible.
+</div>
+
 ## 8. Holt Winters method
+
+<div style="text-align: justify">
+Based on the time series decomposition we will configure the Holt-Winters parameters for predicting the test data. We will set the seasonality to be multiplicative and set trend to be None.
+</div>
+
+The performance measures for the Holt Winters Model are as follows:
+
+<table>
+<tr>
+<th>RMSE</th>
+<th>MSE</th>
+<th>Residual Variance</th>
+<th>Residual Mean</th>
+</tr>
+<tr>
+<td>84690.827</td>
+<td>291.017</td>
+<td>84197.577</td>
+<td>-22.209</td>
+</tr>
+</table>
+<br>
+The plot for Holt Winter model prediction along with actual predictions is shown below:
+<br>
+<center><img src="saved_images/img19.jpg"/></center>
+<br>
+We notice from above plot that the Holt Winter model predictions are close to the actual values.
+<br><br>
+ACF of residuals: We notice that the ACF plot for Holt Winter method resembles the white noise.
+<center><img src="saved_images/img20.jpg"/></center>
 
 ## 9. Multiple Linear Regression
 
