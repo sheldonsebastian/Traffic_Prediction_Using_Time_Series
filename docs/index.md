@@ -116,8 +116,40 @@ Hence, we do not need to perform any data imputation.
 </div>
 
 <br>
-<b>Summary Statistics</b>
+<b>Traffic Volume over time</b>
 <br>
+<div style="text-align: justify">
+We plot the traffic volume over time, the traffic volume data is resampled to daily data and the scope of data is from 09/2016 to 09/2018.
+</div>
+<center><img src="saved_images/img8.jpg"/></center>
+
+<br>
+<b>ACF of traffic volume</b>
+<br>
+<div style="text-align: justify">
+For plotting the ACF plot we have set the value of lag = 200.
+<center><img src="saved_images/img9.jpg"/></center>
+<br>
+We notice that the ACF values show decay at lag = 200.
+</div>
+
+<br>
+<b>Train-Test Split</b>
+<br>
+<div style="text-align: justify">
+We split the resampled data into train and test datasets. The dimension for train dataset is <b>(584,6)</b>. The dimension for test dataset is <b>(147,6)</b>
+</div>
+
+<br>
+<b>Stationarity Check</b>
+<br>
+<div style="text-align: justify">
+To check if traffic volume is stationary or not, we perform the ADF test.
+<br>
+<center><img src="saved_images/img10.jpg"/></center>
+<br>
+From ADF test we conclude that traffic volume is stationary.
+</div>
 
 
 ## References
