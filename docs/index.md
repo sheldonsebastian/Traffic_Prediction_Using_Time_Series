@@ -27,7 +27,7 @@ We are predicting the traffic volume per day for the I94 interstate. The traffic
 8. Holt Winters method
 9. Multiple Linear Regression
 10. ARMA model
-11. Best Model
+11. Final Model Selection
 12. Conclusion
 
 
@@ -370,9 +370,129 @@ The plot for linear model prediction along with actual predictions is shown belo
 
 ## 10. ARMA model
 
-## 11. Best Model
+<div style="text-align: justify">
+We will now predict the test data using the ARMA process. For this we will create the GPAC table and then find potential order of the ARMA process. After we find the order of ARMA process we will estimate its parameters.<br><br>
+We computed the mean of training data and subtracted it from the training data. This is done to relax the ARMA constraint. Since the ARMA model does not include an intercept, it might be a challenge to fit data with non-zero mean.<br><br>
+Once the order and parameters are estimated we will forecast the values and add the mean of training data. After adding mean, we check whether the residuals of forecasted and actual values are significant or not using the chi squared diagnostic test.
+</div>
+
+### GPAC Table:
+
+The GPAC table with j=12, and k=12 is shown below:
+<center><img src="saved_images/img26.jpg"/></center>
+
+<br>
+From the GPAC table we consider the following orders for ARMA parameter estimation.
+<center><img src="saved_images/img27.jpg"/></center>
+
+<br>
+
+<div style="text-align: justify">
+(n_a, n_b) = [(2, 5), (2, 7), (4, 0), (4, 2), (4, 5), (4, 7), (6, 5), (10, 3)]<br><br>
+We noticed that none of the identified ARMA order from the GPAC table pass the chi squared test.<br><br>
+Thus, we try for all possible combinations of orders from the GPAC table in a brute force manner; the ARMA(4,6) passes the Chi Square test, but shows no pattern in GPAC table; this might be possible since we have only 584 samples in the training data.
+</div>
+
+### Chi Square Test:
+<div style="text-align: justify">
+After trying a brute force approach for all possible order combinations for GPAC table, the ARMA(4,6) passes the chi square test. And as mentioned previously it shows no pattern in the GPAC table, a possible reason could be the small training size of 584 data points.
+</div>
+
+### Parameter Estimation:
+<div style="text-align: justify">
+The estimated parameters based on n_a=4 and n_b=6 is:<br>
+</div>
+<center><img src="saved_images/img28.jpg"/></center>
+
+### Summary of ARMA(4,6) model:
+<div style="text-align: justify">
+The summary of ARMA(4,6) model is as follows:<br>
+</div>
+<center><img src="saved_images/img29.jpg"/></center>
+
+### Simplification of Model:
+<div style="text-align: justify">
+We will now simplify the ARMA(4,6) model by checking if zeros are included in confidence interval or not.<br>
+The confidence interval for the parameters are as follows:<br>
+<center><img src="saved_images/img30.jpg"/></center>
+
+We notice there are no zeros in the confidence interval band. Thus, no simplification needed.<br><br>
+We will also simplify model based on zero/pole cancellation by checking the roots of numerator and denominator. The roots of the AR and MA process are:
+<center><img src="saved_images/img31.jpg"/></center><br>
+None of the roots are same, thus no zero/pole cancellation required. Hence the final ARMA model after simplification is ARMA(4,6).
+</div>
+
+### Performance Measures:
+
+Plot of Prediction: The plot of forecasted values with the actual value is shown below:<br>
+<center><img src="saved_images/img32.jpg"/></center><br>
+<br><br>
+ACF of residual: The ACF of residuals for ARMA(4,6) is,
+<center><img src="saved_images/img33.jpg"/></center><br>
+<br>
+We conclude that the ACF plot does not resemble white noise.
+<br><br>
+A possible reason for poor performance of ARMA model is that our data contains seasonality.
+
+<br><br>
+The performance measures for the ARMA model are as follows:
+
+<table>
+<tr>
+<th>RMSE</th>
+<th>MSE</th>
+<th>Residual Variance</th>
+<th>Residual Mean</th>
+</tr>
+<tr>
+<td>919.591</td>
+<td>845648.87</td>
+<td>842603.408</td>
+<td>55.185</td>
+</tr>
+</table>
+<br><br>
+
+Biased or Unbiased models: Since the absolute value of mean of the residuals is greater than 0.05, we say that the model is biased. We can remove the bias by adding the mean to all the predictions.<br>
+<br>
+
+Variance of error of estimated parameters:
+Estimated variance of error for na = 4 and nb = 6 is 119649.321
+
+## 11. Final Model Selection
+
+<div style="text-align: justify">
+In our analysis for predicting traffic volume we have used the Average Method, Naïve Method, Drift Method, Holt Winter Model, Multiple Linear Regression model and the ARMA model. We will now compare the outputs of these models and provide conclusions.<br>
+</div>
+
+|Model|MSE|RMSE|Residual Mean|Residual Variance|
+|------|-----|-----|------|--------|
+|Holt Winter Model|84690.827|291.016884|-22.209225|84197.577336|
+|Multiple Linear Regression Model|256424.508|506.383756|-35.470217|255166.372084|
+|Average Model|282937.565|531.918758|55.477248|279859.840159|
+|ARMA(4, 6) Model|845648.870|919.591687|55.185695|842603.408654|
+|Naive Model|1191763.077|1091.679017|954.936248|279859.840159|
+|Drift Model|1497497.754|1223.722907|1101.430227|284349.208489|
+
+<br>
+<div style="text-align: justify">
+When we consider RMSE to be performance metric, we conclude that Holt Winter has the smallest RMSE and thus performs the best.
+<b>Hence for traffic volume prediction problem the Holt Winter model is the best model.</b>
+</div>
+
+<br><br>
+The plots for predicted and the actual values for all models are shown:
+<center><img src="saved_images/img34.jpg"/></center><br>
+<center><img src="saved_images/img35.jpg"/></center><br>
+<center><img src="saved_images/img36.jpg"/></center><br>
+<center><img src="saved_images/img37.jpg"/></center><br>
+<center><img src="saved_images/img38.jpg"/></center><br>
+<center><img src="saved_images/img39.jpg"/></center><br>
+
 
 ## 12. Conclusion
+
+In conclusion based on the RMSE values, the Holt Winters model is recommended for traffic volume prediction. For future scope we may want to explore other models like SARIMA or recurrent neural networks.
 
 ## References
 
